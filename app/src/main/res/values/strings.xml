@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">TapTest</string>
+    <string name="action_settings">Settings</string>
+    <string-array name="color_choices">
+        <item>Black</item>
+        <item>White</item>
+        <item>Blue</item>
+        <item>Red</item>
+        <item>Translucent</item>
+        <item>Transparent</item>
+    </string-array>
+</resources>
