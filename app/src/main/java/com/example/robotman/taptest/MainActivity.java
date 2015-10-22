@@ -45,19 +45,75 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_main);
         setContentView(R.layout.options);
+        initAdmin();
+
+        initButtons();
+        retrieveSavedSettings();
+
+       initHashMap();
+       initSpinner();
+
+        if(settings.isService())
+        {
+            tbtnBar.setEnabled(true);
+            tbtnDown.setEnabled(true);
+            tbtnOrientation.setEnabled(true);
+            spinner.setEnabled(true);
+        }
+        else
+        {
+            tbtnBar.setEnabled(false);
+            tbtnDown.setEnabled(false);
+            tbtnOrientation.setEnabled(false);
+            spinner.setEnabled(false);
+        }
+        if(!settings.isBarOn())
+        {
+            tbtnDown.setEnabled(false);
+            tbtnOrientation.setEnabled(false);
+            spinner.setEnabled(false);
+        }
+
+        attachListeners();
+        if(isMyServiceRunning(MyService.class))
+        {
+            tbtnBar.setEnabled(true);
+            tbtnDown.setEnabled(true);
+            tbtnOrientation.setEnabled(true);
+            spinner.setEnabled(true);
+            tbtnService.setChecked(true);
+            //Bind the activity if the service is already running
+            if(!isBound)
+            {
+                //Bind the service
+                isBound = bindService(new Intent(this, MyService.class), mConnection,0);
+            }
+        }
+        else
+        {
+            tbtnService.setChecked(false);
+        }
+
+    }
+    public void initAdmin()
+    {
         mDevicePolicyManager = (DevicePolicyManager) getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         mDevicePolicyManager = (DevicePolicyManager) getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         mComponentName = new ComponentName(this, MyAdminReceiver.class);
-
+    }
+    public void initButtons()
+    {
         //Attach buttons to layout
         tbtnAdmin = (ToggleButton)findViewById(R.id.tbtnAdmin);
         tbtnService = (ToggleButton)findViewById(R.id.tbtnService);
         tbtnBar = (ToggleButton)findViewById(R.id.tbtnBar);
         tbtnOrientation = (ToggleButton)findViewById(R.id.tbtnOrientation);
         tbtnDown = (ToggleButton)findViewById(R.id.tbtnDown);
-
+    }
+    public void retrieveSavedSettings()
+    {
         //Retrieve saved settings
         settings= new SaveSettings(this.getApplicationContext());
         tbtnAdmin.setChecked(settings.isAdmin());
@@ -65,15 +121,9 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         tbtnBar.setChecked(settings.isBarOn());
         tbtnOrientation.setChecked(settings.isBarLeft());
         tbtnDown.setChecked(settings.isSensorsOn());
-
-
-        //Attach listeners
-        tbtnAdmin.setOnCheckedChangeListener(this);
-        tbtnService.setOnCheckedChangeListener(this);
-        tbtnBar.setOnCheckedChangeListener(this);
-        tbtnOrientation.setOnCheckedChangeListener(this);
-        tbtnDown.setOnCheckedChangeListener(this);
-
+    }
+    public void initHashMap()
+    {
         //add to hashmap
         switchStatus= new HashMap<>();
         switchStatus.put(R.id.tbtnAdmin, settings.isAdmin());
@@ -82,6 +132,10 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         switchStatus.put(R.id.tbtnOrientation, tbtnOrientation.isChecked());
         switchStatus.put(R.id.tbtnDown, tbtnDown.isChecked());
 
+    }
+
+    public void initSpinner()
+    {
         //Setup spinner
         spinner = (Spinner) findViewById(R.id.spinner);
         // Create an ArrayAdapter using the string array and a default spinner layout
@@ -93,34 +147,17 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         spinner.setAdapter(adapter);
         //Set the position of the spinner
         spinner.setSelection(settings.getSpinnerPos());
-
-        if(settings.isService())
-        {
-            tbtnBar.setEnabled(true);
-            tbtnDown.setEnabled(true);
-            tbtnOrientation.setEnabled(true);
-            spinner.setEnabled(true);
-        }
-        if(!settings.isBarOn())
-        {
-            tbtnDown.setEnabled(false);
-            tbtnOrientation.setEnabled(false);
-            spinner.setEnabled(false);
-        }
+    }
+    public void attachListeners()
+    {
+        //Attach listeners
+        tbtnAdmin.setOnCheckedChangeListener(this);
+        tbtnService.setOnCheckedChangeListener(this);
+        tbtnBar.setOnCheckedChangeListener(this);
+        tbtnOrientation.setOnCheckedChangeListener(this);
+        tbtnDown.setOnCheckedChangeListener(this);
         //Set the listener
         spinner.setOnItemSelectedListener(this);
-
-        //Bind the activity if the service is already running
-        if(isMyServiceRunning(MyService.class) &&!isBound)
-        {
-            //Bind the service
-            isBound= bindService(new Intent(this, MyService.class), mConnection,0);
-        }
-    }
-
-    public void initSpinner()
-    {
-
     }
     protected void onResume() {
         super.onResume();
@@ -147,11 +184,11 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         public void onServiceConnected(ComponentName className,
                                        IBinder service)
         {
-           // Toast.makeText(MainActivity.this, "onServiceConnected called", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(MainActivity.this, "onServiceConnected called", Toast.LENGTH_SHORT).show();
             // We've binded to LocalService, cast the IBinder and get LocalService instance
             MyService.LocalBinder binder = (MyService.LocalBinder) service;
             myService = binder.getServiceInstance(); //Get instance of your service!
-           // Toast.makeText(getApplicationContext(), "bound", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getApplicationContext(), "bound", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -190,22 +227,22 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         switch (buttonView.getId())
         {
             case R.id.tbtnAdmin:
-               if(!switchStatus.get(R.id.tbtnAdmin))
-               {
-                   //Enable admin
-                   Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                   intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mComponentName);
-                   intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, description);
-                   startActivityForResult(intent, ADMIN_INTENT);
-                   switchStatus.put(R.id.tbtnAdmin,true);
-               }
+                if(!switchStatus.get(R.id.tbtnAdmin))
+                {
+                    //Enable admin
+                    Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, mComponentName);
+                    intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, description);
+                    startActivityForResult(intent, ADMIN_INTENT);
+                    switchStatus.put(R.id.tbtnAdmin,true);
+                }
                 else
-               {
-                   //Disable admin
-                   switchStatus.put(R.id.tbtnAdmin,false);
-                   mDevicePolicyManager.removeActiveAdmin(mComponentName);
-                   Toast.makeText(getApplicationContext(), "Admin registration removed", Toast.LENGTH_SHORT).show();
-               }
+                {
+                    //Disable admin
+                    switchStatus.put(R.id.tbtnAdmin,false);
+                    mDevicePolicyManager.removeActiveAdmin(mComponentName);
+                    Toast.makeText(getApplicationContext(), "Admin registration removed", Toast.LENGTH_SHORT).show();
+                }
                 break;
 
             case R.id.tbtnService:

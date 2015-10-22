@@ -11,7 +11,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.widget.Toast;
 
 public class MyService extends Service //implements View.OnTouchListener
 {

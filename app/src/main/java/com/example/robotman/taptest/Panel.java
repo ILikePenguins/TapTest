@@ -11,6 +11,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.Spinner;
 
 import java.util.ArrayList;
 
@@ -54,20 +55,27 @@ public class Panel implements View.OnTouchListener, View.OnClickListener
         mWindowManager = (WindowManager) service.getSystemService(service.WINDOW_SERVICE);
         // set layout parameter of window manager
         startWidth = 40;
+        if(!settings.isBarLeft())
+        {
+            left=true;
+        }
+        else {
+            left=false;
+        }
         setSize(startWidth);
         Log.i(TAG, "add View");
         addButton("Lock", 0);
         addButton("Reboot", 1);
-        setBarOrientation("left");
+        //setBarOrientation("left");
         mWindowManager.addView(touchLayout, mParams);
         //Set Color
         if(settings.getColor().equals("")|| settings.getColor()==null)
             touchLayout.setBackgroundColor(Color.RED);
         else {
             Log.i(TAG, "colorrrr "+ settings.getColor());
-
             setColor(settings.getColor());
         }
+
         isCreated=true;
     }
     public void setColor(String color)

@@ -9,7 +9,7 @@ public class SaveSettings
     public static final String PREFS_NAME = "MyPrefsFile";
     private SharedPreferences settings;
     private boolean barOn;
-    private boolean barLeft;
+    private boolean barLeft=true;
     private boolean sensorsOn;
     private boolean admin;
     private boolean service;
