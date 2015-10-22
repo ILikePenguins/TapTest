@@ -28,13 +28,14 @@ public class Panel implements View.OnTouchListener, View.OnClickListener
     private ArrayList<Button> buttons;
     private boolean isCreated;
     private boolean left;
+    private SaveSettings settings;
 
     public Panel(MyService service, LockScreen lock)
     {
         this.service = service;
         this.lock = lock;
         buttons = new ArrayList<Button>();
-
+        settings=new SaveSettings(service.getApplicationContext());
     }
 
     public void createPanel()
@@ -45,8 +46,7 @@ public class Panel implements View.OnTouchListener, View.OnClickListener
         touchLayout.setLayoutParams(lp);
         touchLayout.requestLayout();
         touchLayout.setOrientation(LinearLayout.VERTICAL);
-        //Set Color
-        touchLayout.setBackgroundColor(Color.RED);
+
         // set on touch listener
         touchLayout.setOnTouchListener(this);
 
@@ -60,6 +60,14 @@ public class Panel implements View.OnTouchListener, View.OnClickListener
         addButton("Reboot", 1);
         setBarOrientation("left");
         mWindowManager.addView(touchLayout, mParams);
+        //Set Color
+        if(settings.getColor().equals("")|| settings.getColor()==null)
+            touchLayout.setBackgroundColor(Color.RED);
+        else {
+            Log.i(TAG, "colorrrr "+ settings.getColor());
+
+            setColor(settings.getColor());
+        }
         isCreated=true;
     }
     public void setColor(String color)
