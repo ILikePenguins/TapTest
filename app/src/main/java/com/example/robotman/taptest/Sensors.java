@@ -5,6 +5,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
+import android.widget.Toast;
 
 public class Sensors implements SensorEventListener
 {
@@ -29,10 +31,25 @@ public class Sensors implements SensorEventListener
     private LockScreen lock;
     private MyService service;
 
+    //Shake
+    private static final int SHAKE_THRESHOLD = 800;
+    private float last_x;
+    private float last_y;
+    private float last_z;
+    private long lastUpdate;
+
+    private boolean shakeOn;
+    private boolean rotateOn;
+    private boolean sensorsOn;
+    private SaveSettings settings;
+
     public  Sensors(MyService service, LockScreen lock)
     {
         this.lock=lock;
         this.service=service;
+        settings=new SaveSettings(service.getApplicationContext());
+        shakeOn=settings.isShakeOn();
+        rotateOn=settings.isSensorsOn();
         startSensors();
     }
 
@@ -56,6 +73,7 @@ public class Sensors implements SensorEventListener
                 gData[1] = event.values[1];
                 gData[2] = event.values[2];
                 haveGrav = true;
+                detectShake();
                 break;
             case Sensor.TYPE_ACCELEROMETER:
                 if (haveGrav) break;    // don't need it, we have better
@@ -63,6 +81,8 @@ public class Sensors implements SensorEventListener
                 gData[1] = event.values[1];
                 gData[2] = event.values[2];
                 haveAccel = true;
+                detectShake();
+
                 break;
             case Sensor.TYPE_MAGNETIC_FIELD:
                 mData[0] = event.values[0];
@@ -74,7 +94,7 @@ public class Sensors implements SensorEventListener
                 return;
         }
 
-        if ((haveGrav || haveAccel) && haveMag)
+        if ( rotateOn&&((haveGrav || haveAccel) && haveMag) )
         {
             SensorManager.getRotationMatrix(Rmat, Imat, gData, mData);
             SensorManager.remapCoordinateSystem(Rmat,
@@ -111,6 +131,7 @@ public class Sensors implements SensorEventListener
             sensorManager.unregisterListener(this, msensor);
             sensorManager.unregisterListener(this, asensor);
         }
+        sensorsOn=false;
     }
 
     public void resume()
@@ -128,5 +149,42 @@ public class Sensors implements SensorEventListener
         Rmat = new float[9];
         R2 = new float[9];
         Imat = new float[9];
+        sensorsOn=true;
+    }
+
+    public void detectShake()
+    {
+        if(shakeOn)
+        {
+            long curTime = System.currentTimeMillis();
+            // only allow one update every 100ms.
+            if ((curTime - lastUpdate) > 100) {
+                long diffTime = (curTime - lastUpdate);
+                lastUpdate = curTime;
+
+                float speed = Math.abs(gData[0] + gData[1] + gData[2] - last_x - last_y - last_z) / diffTime * 10000;
+
+
+                if (speed > SHAKE_THRESHOLD) {
+                    lock.lockScreen();
+                   // Log.d("sensor", "shake detected w/ speed: " + speed);
+                }
+                last_x = gData[0];
+                last_y = gData[1];
+                last_z = gData[2];
+            }
+        }
+    }
+
+    public void setShakeOn(boolean shakeOn) {
+        this.shakeOn = shakeOn;
+    }
+
+    public void setRotateOn(boolean rotateOn) {
+        this.rotateOn = rotateOn;
+    }
+
+    public boolean isSensorsOn() {
+        return sensorsOn;
     }
 }

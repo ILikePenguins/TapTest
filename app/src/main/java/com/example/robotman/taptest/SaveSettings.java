@@ -15,12 +15,15 @@ public class SaveSettings
     private boolean service;
     private String color;
     private int spinnerPos;
+    private boolean shakeOn;
 
     public SaveSettings(Context context)
     {
         settings = context.getSharedPreferences(PREFS_NAME, 0);
         color="";
     }
+
+
 
     public void saveBoolean(String key, boolean value)
     {
@@ -46,6 +49,20 @@ public class SaveSettings
 
         // Commit the edits!
         editor.commit();
+    }
+    public boolean isShakeOn()
+    {
+        if(settings.contains("shakeOn"))
+        {
+            return settings.getBoolean("shakeOn",false);
+        }
+        return shakeOn;
+    }
+
+    public void setShakeOn(boolean shakeOn) {
+        this.shakeOn = shakeOn;
+        saveBoolean("shakeOn",shakeOn);
+
     }
     public void setBarOn(boolean barOn) {
         this.barOn = barOn;

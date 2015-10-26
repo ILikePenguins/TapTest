@@ -111,12 +111,12 @@ public class MyService extends Service //implements View.OnTouchListener
                 //Toast.makeText(this, "creating panel", Toast.LENGTH_SHORT).show();
                 panel.createPanel();
             }
-            if (intent.getBooleanExtra("sensor", false)||settings.isSensorsOn()) {
+            if (intent.getBooleanExtra("sensor", false)||settings.isSensorsOn()||settings.isShakeOn()) {
                 //Sensor set to true
                 sensors.resume();
             }
         }
-        return START_NOT_STICKY;
+        return START_STICKY; //START_NOT_STICKY
     }
 
     @Override

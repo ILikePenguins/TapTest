@@ -163,4 +163,26 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New ToggleButton"
+        android:id="@+id/tbtnShake"
+        android:layout_below="@+id/tbtnDown"
+        android:layout_alignLeft="@+id/tbtnAdmin"
+        android:layout_alignStart="@+id/tbtnAdmin"
+        android:checked="false" />
+
+
+   <TextView
+       android:textColor="@color/white"
+       android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Turn phone off by shaking"
+        android:id="@+id/textView11"
+        android:layout_alignBottom="@+id/tbtnShake"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
 </RelativeLayout>

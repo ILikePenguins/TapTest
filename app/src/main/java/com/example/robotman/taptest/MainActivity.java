@@ -25,19 +25,23 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 {
     private static final int ADMIN_INTENT = 15;
     private static final String description = "Sample Administrator description";
+
     private DevicePolicyManager mDevicePolicyManager;
     private ComponentName mComponentName;
     private HashMap<Integer,Boolean> switchStatus;
     private MyService myService;
+    //Components
     private  ToggleButton tbtnBar;
     private  ToggleButton tbtnOrientation;
     private  ToggleButton tbtnDown;
     private ToggleButton tbtnService;
     private ToggleButton tbtnAdmin;
+    private ToggleButton tbtnShake;
+    private Spinner spinner;
+
     private boolean isBound;
     private Intent serviceIntent;
     private SaveSettings settings;
-    private Spinner spinner;
     @Override
 
     protected void onCreate(Bundle savedInstanceState)
@@ -59,6 +63,8 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
             tbtnDown.setEnabled(true);
             tbtnOrientation.setEnabled(true);
             spinner.setEnabled(true);
+            tbtnShake.setEnabled(true);
+
         }
         else
         {
@@ -66,6 +72,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
             tbtnDown.setEnabled(false);
             tbtnOrientation.setEnabled(false);
             spinner.setEnabled(false);
+            tbtnShake.setEnabled(false);
         }
         if(!settings.isBarOn())
         {
@@ -82,6 +89,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
             tbtnOrientation.setEnabled(true);
             spinner.setEnabled(true);
             tbtnService.setChecked(true);
+            tbtnShake.setEnabled(true);
             //Bind the activity if the service is already running
             if(!isBound)
             {
@@ -111,6 +119,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         tbtnBar = (ToggleButton)findViewById(R.id.tbtnBar);
         tbtnOrientation = (ToggleButton)findViewById(R.id.tbtnOrientation);
         tbtnDown = (ToggleButton)findViewById(R.id.tbtnDown);
+        tbtnShake=(ToggleButton)findViewById(R.id.tbtnShake);
     }
     public void retrieveSavedSettings()
     {
@@ -121,6 +130,8 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         tbtnBar.setChecked(settings.isBarOn());
         tbtnOrientation.setChecked(settings.isBarLeft());
         tbtnDown.setChecked(settings.isSensorsOn());
+        tbtnShake.setChecked(settings.isShakeOn());
+
     }
     public void initHashMap()
     {
@@ -131,6 +142,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         switchStatus.put(R.id.tbtnBar, settings.isBarOn());
         switchStatus.put(R.id.tbtnOrientation, tbtnOrientation.isChecked());
         switchStatus.put(R.id.tbtnDown, tbtnDown.isChecked());
+        switchStatus.put(R.id.tbtnShake,tbtnShake.isChecked());
 
     }
 
@@ -156,6 +168,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         tbtnBar.setOnCheckedChangeListener(this);
         tbtnOrientation.setOnCheckedChangeListener(this);
         tbtnDown.setOnCheckedChangeListener(this);
+        tbtnShake.setOnCheckedChangeListener(this);
         //Set the listener
         spinner.setOnItemSelectedListener(this);
     }
@@ -208,7 +221,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         settings.setBarOn(tbtnBar.isChecked());
         settings.setBarLeft(tbtnOrientation.isChecked());
         settings.setSensorsOn(tbtnDown.isChecked());
-
+        settings.setShakeOn(tbtnShake.isChecked());
     }
 
     @Override
@@ -264,6 +277,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
                     //Enable the buttons
                     tbtnBar.setEnabled(true);
                     tbtnDown.setEnabled(true);
+                    tbtnShake.setEnabled(true);
                     tbtnOrientation.setEnabled(true);
                     spinner.setEnabled(true);
 
@@ -289,6 +303,7 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
                     tbtnDown.setEnabled(false);
                     tbtnOrientation.setEnabled(false);
                     spinner.setEnabled(false);
+                    tbtnShake.setEnabled(false);
 
                 }
                 break;
@@ -337,18 +352,46 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
                 break;
 
             case R.id.tbtnDown:
-                if(!switchStatus.get(R.id.tbtnDown) )
-                {
-                    myService.getSensors().startSensors();
-                    myService.getSensors().resume();
-                    switchStatus.put(R.id.tbtnDown, true);
-                }
-                else {
-                    myService.getSensors().destroy();
 
+
+                if(!switchStatus.get(R.id.tbtnDown))
+                {
+                    myService.getSensors().setRotateOn(true);
+                    if(!myService.getSensors().isSensorsOn())
+                    {
+                        myService.getSensors().startSensors();
+                        myService.getSensors().resume();
+                    }
+                    switchStatus.put(R.id.tbtnDown, true);
+                    Toast.makeText(getApplicationContext(), "down if "+switchStatus.get(R.id.tbtnDown), Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    if(!switchStatus.get(R.id.tbtnShake))
+                        myService.getSensors().destroy();
                     switchStatus.put(R.id.tbtnDown, false);
+                    myService.getSensors().setRotateOn(false);
+                    Toast.makeText(getApplicationContext(), "down else " + switchStatus.get(R.id.tbtnDown), Toast.LENGTH_SHORT).show();
                 }
                 break;
+            case R.id.tbtnShake:
+                if(!switchStatus.get(R.id.tbtnShake) )
+                {
+                    myService.getSensors().setShakeOn(true);
+                    if(!myService.getSensors().isSensorsOn())
+                    {
+                        myService.getSensors().startSensors();
+                        myService.getSensors().resume();
+                    }
+                    switchStatus.put(R.id.tbtnShake, true);
+                }
+                else
+                {
+                    if(!switchStatus.get(R.id.tbtnDown))
+                        myService.getSensors().destroy();
+                    switchStatus.put(R.id.tbtnShake, false);
+                    myService.getSensors().setShakeOn(false);
+                }
         }
     }
 
