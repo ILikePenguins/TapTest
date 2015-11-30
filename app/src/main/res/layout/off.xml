@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:id="@+id/relativeLayout"
+    android:focusable="true"
+    android:focusableInTouchMode ="true">
+
+    <ToggleButton
+        android:textOff="Disabled"
+        android:textOn="Enabled"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tbtnAdmin"
+        android:layout_gravity="right"
+        android:checked="false"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Required to lock the screen"
+        android:id="@+id/textView4" />
+
+    <ToggleButton
+        android:textOff="Off"
+        android:textOn="Running"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tbtnService"
+        android:checked="false"
+        android:layout_below="@+id/tbtnAdmin"
+        android:layout_alignLeft="@+id/tbtnAdmin"
+        android:layout_alignStart="@+id/tbtnAdmin" />
+
+    <TextView
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Start or stop the service"
+        android:id="@+id/textView5"
+        android:layout_alignBottom="@+id/tbtnService"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+
+    <TextView
+        android:textSize="40sp"
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Sensors"
+        android:id="@+id/textView8"
+        android:layout_above="@+id/textView9"
+        android:layout_alignRight="@+id/textView12"
+        android:layout_alignEnd="@+id/textView12" />
+
+    <ToggleButton
+        android:enabled="false"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New ToggleButton"
+        android:id="@+id/tbtnDown"
+        android:checked="true"
+        android:layout_alignTop="@+id/textView9"
+        android:layout_alignRight="@+id/editThresh"
+        android:layout_alignEnd="@+id/editThresh" />
+
+    <TextView
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Turn phone upside down to lock "
+        android:id="@+id/textView9"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New ToggleButton"
+        android:id="@+id/tbtnShake"
+        android:checked="false"
+        android:layout_above="@+id/editThresh"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+
+    <TextView
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Lock phone by shaking left to right"
+        android:id="@+id/textView11"
+        android:layout_alignTop="@+id/tbtnShake"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:background="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberSigned"
+        android:ems="10"
+        android:id="@+id/editThresh"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/textView9"
+        android:layout_marginBottom="84dp"
+        android:layout_toRightOf="@+id/textView9" />
+
+    <TextView
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Shake threshold(500-1500):"
+        android:id="@+id/textView12"
+        android:layout_alignTop="@+id/editThresh"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:background="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="numberSigned"
+        android:ems="10"
+        android:id="@+id/editAngle"
+        android:layout_toEndOf="@+id/textView5"
+        android:layout_toRightOf="@+id/textView5"
+        android:layout_below="@+id/tbtnDown"
+        android:layout_alignLeft="@+id/tbtnDown"
+        android:layout_alignStart="@+id/tbtnDown" />
+
+    <TextView
+        android:textColor="@color/white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Rotation threshold(25-90)rotate moe for higher values"
+        android:id="@+id/textView13"
+        android:layout_below="@+id/tbtnDown"
+        android:layout_toStartOf="@+id/editThresh"
+        android:layout_toLeftOf="@+id/editThresh" />
+
+</RelativeLayout>

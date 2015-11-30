@@ -1,16 +1,29 @@
 package com.example.robotman.taptest;
 
+import android.app.ActionBar;
 import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+import android.view.Display;
+import android.view.Surface;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.RemoteViews;
+import android.widget.Toast;
 
 public class MyService extends Service //implements View.OnTouchListener
 {
@@ -24,6 +37,8 @@ public class MyService extends Service //implements View.OnTouchListener
    // private static boolean barOn=true;
    // private static boolean tiltOn=true;
     private SaveSettings settings;
+    private Orientation orientation;
+    private boolean isForeground;
 
     public class LocalBinder extends Binder
     {
@@ -46,41 +61,10 @@ public class MyService extends Service //implements View.OnTouchListener
         sensors= new Sensors(this, lock);
         panel = new Panel(this,lock);
         settings= new SaveSettings(getApplicationContext());
+        orientation= new Orientation(this);
        // panel.createPanel();
     }
 
-
-//    @Override
-//        public void onStart(Intent intent, int startid)
-//        {
-//            Toast.makeText(this, "on start", Toast.LENGTH_SHORT).show();
-//            //sensors.resume();
-//            detectScreenState();
-//            panel.createPanel();
-//            Bundle extras = intent.getExtras();
-//            if(extras!=null)
-//            {
-//                if (intent.getBooleanExtra("panel", false)||barOn) {
-//                    //Panel is set to true
-//                    Toast.makeText(this, "creating panel :", Toast.LENGTH_SHORT).show();
-//                    panel.createPanel();
-//                    barOn=true;
-//                }
-//                if (intent.getBooleanExtra("sensor", false)||tiltOn) {
-//                    //Sensor set to true
-//                    sensors.resume();
-//                    tiltOn=true;
-//                }
-//            }
-//        }
-
-//    @Override
-//    public void onNewIntent(Intent newIntent) {
-//        this.setIntent(newIntent);
-//
-//        // Now getIntent() returns the updated Intent
-//        isNextWeek = getIntent().getBooleanExtra(IS_NEXT_WEEK, false);
-//    }
     @Override
     public void onTaskRemoved(Intent rootIntent)
     {
@@ -103,7 +87,10 @@ public class MyService extends Service //implements View.OnTouchListener
             detectScreenState();
         //Toast.makeText(this, "commmaaannddd", Toast.LENGTH_SHORT).show();
 
-        Bundle extras = intent.getExtras();
+
+        Bundle extras=null;
+        if(intent!=null)
+            extras = intent.getExtras();
         if(extras!=null)
         {
             if (intent.getBooleanExtra("panel", false)||settings.isBarOn()) {
@@ -113,10 +100,53 @@ public class MyService extends Service //implements View.OnTouchListener
             }
             if (intent.getBooleanExtra("sensor", false)||settings.isSensorsOn()||settings.isShakeOn()) {
                 //Sensor set to true
+               // Toast.makeText(this, "senses", Toast.LENGTH_SHORT).show();
                 sensors.resume();
             }
         }
+        else
+        {
+            if(settings.isSensorsOn()||settings.isShakeOn())
+                sensors.resume();
+
+            if(settings.isBarOn())
+                panel.createPanel();
+        }
+        putInForeground();
         return START_STICKY; //START_NOT_STICKY
+    }
+    public void putInForeground()
+    {
+       // Toast.makeText(this, "putting in foreground", Toast.LENGTH_SHORT).show();
+
+        Intent i=new Intent(this, OffActivity.class);
+
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        //init the pending intent
+        int requestID = (int) System.currentTimeMillis();
+        PendingIntent pi=PendingIntent.getActivity(
+                getApplicationContext(),
+                requestID,
+                i,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        //Init the notification
+        Notification note = new Notification.Builder(this)
+                .setContentTitle("Phone Locker ")
+                .setContentText("I lock phones")
+                .setSmallIcon(R.drawable.stickman_icon)
+                        .setPriority(Notification.PRIORITY_MIN)
+                       // .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+                .setContentIntent(pi)
+                .build();
+
+      //  note.flags|=Notification.FLAG_AUTO_CANCEL;
+
+        startForeground(1337, note);
+        isForeground=true;
+       // Toast.makeText(this, "starting foreground", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -125,6 +155,7 @@ public class MyService extends Service //implements View.OnTouchListener
         //Toast.makeText(this, "boooooooooop", Toast.LENGTH_LONG).show();
         panel.destroy();
         sensors.destroy();
+        stopForeground();
         if(registered) {
             this.unregisterReceiver(this.screenoffReceiver);
             registered=false;
@@ -133,6 +164,14 @@ public class MyService extends Service //implements View.OnTouchListener
         super.onDestroy();
     }
 
+    public void stopForeground()
+    {
+        if(isForeground)
+        {
+            stopForeground(true);
+            isForeground=false;
+        }
+    }
     public void detectScreenState()
     {
         //Detects if the screen is on or off
@@ -160,6 +199,9 @@ public class MyService extends Service //implements View.OnTouchListener
         registerReceiver(screenoffReceiver, filter);
         registered=true;
     }
+
+
+
 
     public Panel getPanel() {
         return panel;

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TapTest</string>
+    <string name="app_name">PhoneLocker</string>
     <string name="action_settings">Settings</string>
     <string-array name="color_choices">
         <item>Black</item>

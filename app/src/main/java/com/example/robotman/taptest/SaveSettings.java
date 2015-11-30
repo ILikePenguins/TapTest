@@ -16,14 +16,14 @@ public class SaveSettings
     private String color;
     private int spinnerPos;
     private boolean shakeOn;
+    private int shakeThreshold;
+    private int angleThreshold;
 
     public SaveSettings(Context context)
     {
         settings = context.getSharedPreferences(PREFS_NAME, 0);
         color="";
     }
-
-
 
     public void saveBoolean(String key, boolean value)
     {
@@ -154,5 +154,33 @@ public class SaveSettings
     public void setSpinnerPos(int spinnerPos) {
         this.spinnerPos = spinnerPos;
         saveInt("spinnerPos",spinnerPos);
+    }
+
+    public int getShakeThreshold()
+    {
+        if(settings.contains("shakeThreshold"))
+        {
+            return settings.getInt("shakeThreshold",0);
+        }
+        return 800;
+    }
+
+    public void setShakeThreshold(int shakeThreshold)
+    {
+        this.shakeThreshold = shakeThreshold;
+        saveInt("shakeThreshold",shakeThreshold);
+    }
+
+    public int getAngleThreshold() {
+        if(settings.contains("angleThreshold"))
+        {
+            return settings.getInt("angleThreshold",0);
+        }
+        return -60;
+    }
+
+    public void setAngleThreshold(int angleThreshold) {
+        this.angleThreshold = angleThreshold;
+        saveInt("angleThreshold",angleThreshold);
     }
 }

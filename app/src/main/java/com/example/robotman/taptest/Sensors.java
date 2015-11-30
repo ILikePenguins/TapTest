@@ -6,7 +6,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
-import android.widget.Toast;
 
 public class Sensors implements SensorEventListener
 {
@@ -22,7 +21,7 @@ public class Sensors implements SensorEventListener
     boolean haveAccel = false;
     boolean haveMag = false;
     private int roll;
-
+    private int angle=-40;
     //Sensors
     private SensorManager sensorManager;
     private Sensor gsensor;
@@ -32,15 +31,17 @@ public class Sensors implements SensorEventListener
     private MyService service;
 
     //Shake
-    private static final int SHAKE_THRESHOLD = 800;
+    private int shakeThreshold = 800;
     private float last_x;
     private float last_y;
     private float last_z;
     private long lastUpdate;
+    private float speed;
 
     private boolean shakeOn;
     private boolean rotateOn;
     private boolean sensorsOn;
+
     private SaveSettings settings;
 
     public  Sensors(MyService service, LockScreen lock)
@@ -48,8 +49,12 @@ public class Sensors implements SensorEventListener
         this.lock=lock;
         this.service=service;
         settings=new SaveSettings(service.getApplicationContext());
+        //Retrieve saved settings
+        shakeThreshold=settings.getShakeThreshold();
+        angle=settings.getAngleThreshold();
         shakeOn=settings.isShakeOn();
         rotateOn=settings.isSensorsOn();
+
         startSensors();
     }
 
@@ -74,6 +79,7 @@ public class Sensors implements SensorEventListener
                 gData[2] = event.values[2];
                 haveGrav = true;
                 detectShake();
+
                 break;
             case Sensor.TYPE_ACCELEROMETER:
                 if (haveGrav) break;    // don't need it, we have better
@@ -82,14 +88,15 @@ public class Sensors implements SensorEventListener
                 gData[2] = event.values[2];
                 haveAccel = true;
                 detectShake();
-
                 break;
+
             case Sensor.TYPE_MAGNETIC_FIELD:
                 mData[0] = event.values[0];
                 mData[1] = event.values[1];
                 mData[2] = event.values[2];
                 haveMag = true;
                 break;
+
             default:
                 return;
         }
@@ -106,20 +113,21 @@ public class Sensors implements SensorEventListener
 
            // int pitch=(int)(Math.toDegrees(orientation[1]));
             roll = (int)(Math.toDegrees(orientation[2]));
-            //int yaw= (int)(Math.toDegrees(orientation[0]));
-            if(roll <-40)
+            int yaw= (int)(Math.toDegrees(orientation[0]));
+            if(roll <angle)
             {
                 lock.lockScreen();
             }
 
-            // Log.d(TAG, "roll: " + (int) (Math.toDegrees(orientation[2])));
+             //Log.d(TAG, "roll: " + (int) (Math.toDegrees(orientation[2])));
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
     }
+
+   
 
     public void destroy()
     {
@@ -149,6 +157,8 @@ public class Sensors implements SensorEventListener
         Rmat = new float[9];
         R2 = new float[9];
         Imat = new float[9];
+
+        speed=0;
         sensorsOn=true;
     }
 
@@ -162,10 +172,10 @@ public class Sensors implements SensorEventListener
                 long diffTime = (curTime - lastUpdate);
                 lastUpdate = curTime;
 
-                float speed = Math.abs(gData[0] + gData[1] + gData[2] - last_x - last_y - last_z) / diffTime * 10000;
+                speed = Math.abs(gData[0] + gData[1] + gData[2] - last_x - last_y - last_z) / diffTime * 10000;
 
 
-                if (speed > SHAKE_THRESHOLD) {
+                if (speed > shakeThreshold) {
                     lock.lockScreen();
                    // Log.d("sensor", "shake detected w/ speed: " + speed);
                 }
@@ -174,6 +184,12 @@ public class Sensors implements SensorEventListener
                 last_z = gData[2];
             }
         }
+    }
+
+    public void setShakeThreshold(int shakeThreshold)
+    {
+        this.shakeThreshold = shakeThreshold;
+
     }
 
     public void setShakeOn(boolean shakeOn) {
@@ -186,5 +202,9 @@ public class Sensors implements SensorEventListener
 
     public boolean isSensorsOn() {
         return sensorsOn;
+    }
+
+    public void setAngle(int angle) {
+        this.angle = angle;
     }
 }
